@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lourdes Hospital Check-In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              medical: {
+                blue: '#2563EB', // Blue 600
+                dark: '#1E40AF', // Blue 800
+                light: '#EFF6FF', // Blue 50
+              },
+              success: '#059669', // Emerald 600 (Bluer green)
+              warning: '#D97706', // Amber 600
+              error: '#DC2626', // Red 600
+              neutral: '#475569', // Slate 600
+              gray: {
+                50: '#F8FAFC',
+                100: '#F1F5F9',
+                200: '#E2E8F0',
+                300: '#CBD5E1',
+                400: '#94A3B8',
+                500: '#64748B',
+                600: '#475569',
+                700: '#334155',
+                800: '#1E293B',
+                900: '#0F172A',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      .high-contrast {
+        background-color: black !important;
+        color: white !important;
+      }
+      .high-contrast * {
+        border-color: white !important;
+      }
+      .high-contrast .text-medical-blue {
+        color: #FFFF00 !important;
+      }
+      .high-contrast .bg-medical-blue {
+        background-color: #FFFF00 !important;
+        color: black !important;
+        border: 2px solid white;
+      }
+      .high-contrast .text-gray-600, 
+      .high-contrast .text-gray-500,
+      .high-contrast .text-neutral {
+        color: #E5E5E5 !important;
+      }
+      .high-contrast input, 
+      .high-contrast select {
+        background-color: black !important;
+        color: white !important;
+        border: 2px solid white !important;
+      }
+      .high-contrast .bg-white {
+        background-color: black !important;
+      }
+      /* Custom scrollbar to look cleaner on kiosk */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #94a3b8; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "d3": "https://esm.sh/d3@^7.9.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gray-50 text-gray-900 transition-colors duration-300">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
