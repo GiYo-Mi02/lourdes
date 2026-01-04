@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '../components/Button';
-import { PatientData, VitalMeasurement, VitalConfig, VitalType } from '../types';
+import { PatientData, VitalMeasurement, VitalConfig, VitalType, AccessibilityState } from '../types';
 import { VitalVisualizer } from '../components/VitalVisualizer';
 import { analyzeVital } from '../services/vitalAnalysisService';
+import { useTranslation } from '../hooks/useTranslation';
+import { getVitalInstructions } from '../services/translations';
 
 interface Props {
   config: VitalConfig;
@@ -11,17 +13,22 @@ interface Props {
   onBack: () => void;
   onSkip: () => void;
   onRequestHelp: () => void;
+  accessibility: AccessibilityState;
 }
 
 type MachineState = 'idle' | 'measuring' | 'success' | 'error';
 
-export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, onNext, onBack, onSkip, onRequestHelp }) => {
+export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, onNext, onBack, onSkip, onRequestHelp, accessibility }) => {
+  const { t } = useTranslation(accessibility);
   const [state, setState] = useState<MachineState>('idle');
   const [progress, setProgress] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [result, setResult] = useState<string>('');
   const [attempts, setAttempts] = useState(0);
   const measurementCompleteRef = useRef(false);
+
+  // Get translated instructions for the vital
+  const instructions = getVitalInstructions(config.id, accessibility.language);
 
   // Reset state when config changes (next vital)
   useEffect(() => {
@@ -125,10 +132,10 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">Instructions:</h2>
                     <div className="bg-blue-50/50 rounded-lg p-6 text-left max-w-lg mx-auto mb-8 border border-blue-100">
                         <ol className="list-decimal pl-5 space-y-3 text-gray-700 text-lg">
-                            {config.instructions.map((inst, idx) => (
+                            {instructions.map((inst, idx) => (
                                 <li key={idx}>{inst}</li>
                             ))}
-                            <li className="font-semibold text-medical-blue">Press "Start" when ready</li>
+                            <li className="font-semibold text-medical-blue">{t('continue_button')}</li>
                         </ol>
                     </div>
                     <div className="inline-flex items-center text-gray-500 mb-8 bg-gray-100 px-4 py-2 rounded-full">
@@ -138,10 +145,10 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
                 </div>
                 <div className="flex flex-col items-center w-full gap-4">
                     <Button onClick={startMeasurement} size="lg" className="w-80 shadow-lg shadow-blue-100">
-                        Start Measurement
+                        {t('continue_button')}
                     </Button>
                     <button onClick={onRequestHelp} className="text-medical-blue hover:underline text-sm font-medium">
-                        Having trouble? Get Staff Help
+                        {t('need_help_button')}
                     </button>
                 </div>
             </>
@@ -154,8 +161,8 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
                     <div className="w-24 h-24 bg-medical-light rounded-full flex items-center justify-center mx-auto mb-6 animate-[spin_3s_linear_infinite]">
                         <i className="fas fa-circle-notch text-5xl text-medical-blue"></i>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-800 animate-pulse">Measuring {config.title}...</h2>
-                    <p className="text-gray-500 mt-2">Please remain still and relaxed.</p>
+                    <h2 className="text-2xl font-bold text-gray-800 animate-pulse">{t('measuring')} {config.title}...</h2>
+                    <p className="text-gray-500 mt-2">{t('remain_still')}</p>
                 </div>
 
                 <VitalVisualizer isActive={true} type={config.title === 'Pulse' || config.title === 'Blood Pressure' ? 'pulse' : 'wave'} />
@@ -173,7 +180,7 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
 
                 <div className="mt-12">
                      <Button variant="outline" onClick={() => setState('idle')} className="border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300">
-                        Cancel Measurement
+                        {t('cancel_button')}
                      </Button>
                 </div>
             </div>
@@ -185,7 +192,7 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
                 <div className="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i className="fas fa-check text-6xl text-success"></i>
                 </div>
-                <h2 className="text-3xl font-bold text-success mb-2">Measurement Complete</h2>
+                <h2 className="text-3xl font-bold text-success mb-2">{t('measurement_complete')}</h2>
                 
                 <div className="bg-green-50 border border-green-200 rounded-xl p-6 max-w-md mx-auto my-8 transform transition-all hover:scale-105 duration-300">
                     <p className="text-gray-600 text-sm uppercase tracking-wide font-bold mb-2">{config.title}</p>
@@ -197,7 +204,7 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
 
                 <div className="flex justify-end">
                     <Button onClick={onNext} size="lg" rightIcon={<i className="fas fa-arrow-right"></i>}>
-                        Next Vital
+                        {t('continue_button')}
                     </Button>
                 </div>
             </div>
@@ -209,7 +216,7 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
                 <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i className="fas fa-exclamation-triangle text-5xl text-blue-600"></i>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Measurement Could Not Complete</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('measurement_failed')}</h2>
                 <p className="text-gray-500 mb-6">Attempt {attempts} of 3</p>
                 
                 <div className="text-left bg-blue-50 p-6 rounded-lg max-w-md mx-auto mb-8 border-l-4 border-medical-blue">
@@ -223,17 +230,17 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
 
                 <div className="flex flex-col gap-4 max-w-xs mx-auto w-full">
                     <Button onClick={startMeasurement} fullWidth className="bg-medical-blue hover:bg-medical-dark">
-                        Try Again
+                        {t('retry_button')}
                     </Button>
                     
                     {/* Only show these options after 3 failed attempts (initial + 2 retries) */}
                     {attempts >= 3 && (
                         <>
                             <Button variant="warning" leftIcon={<i className="fas fa-user-nurse"></i>} fullWidth onClick={onRequestHelp}>
-                                Get Staff Help
+                                {t('need_help_button')}
                             </Button>
                             <Button variant="outline" onClick={onSkip} fullWidth>
-                                Skip This Vital
+                                {t('skip_button')}
                             </Button>
                         </>
                     )}
@@ -244,9 +251,9 @@ export const VitalMeasurementScreen: React.FC<Props> = ({ config, onComplete, on
         {/* Navigation Footer for IDLE state */}
         {state === 'idle' && (
             <div className="flex justify-between items-center mt-auto pt-8 border-t border-gray-100 w-full">
-                <Button variant="outline" onClick={onBack} leftIcon={<i className="fas fa-arrow-left"></i>}>Back</Button>
+                <Button variant="outline" onClick={onBack} leftIcon={<i className="fas fa-arrow-left"></i>}>{t('back_button')}</Button>
                 <button onClick={onSkip} className="text-gray-400 hover:text-gray-600 font-medium px-4 py-2">
-                    Skip <i className="fas fa-forward ml-2"></i>
+                    {t('skip_button')} <i className="fas fa-forward ml-2"></i>
                 </button>
             </div>
         )}

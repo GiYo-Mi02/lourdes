@@ -141,7 +141,7 @@ export const AdminDashboard: React.FC<Props> = ({ onExit }) => {
                 <i className="fas fa-hospital-alt text-white"></i>
             </div>
             <div>
-                <h1 className="font-bold text-lg leading-tight">Lourdes Admin</h1>
+                <h1 className="font-bold text-lg leading-tight">Vitalis Admin</h1>
                 <p className="text-xs text-blue-300">Staff Portal</p>
             </div>
         </div>

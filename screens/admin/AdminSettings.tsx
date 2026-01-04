@@ -4,7 +4,7 @@ import { Input } from '../../components/Input';
 import { getKioskSettings, saveKioskSettings, KioskSettings } from '../../services/patientService';
 
 export const AdminSettings: React.FC = () => {
-  const [hospitalName, setHospitalName] = useState('Lourdes Hospital');
+  const [hospitalName, setHospitalName] = useState('Vitalis Kiosk');
   const [kioskId, setKioskId] = useState('KIOSK-01');
   const [vitalsConfig, setVitalsConfig] = useState({
       respiratoryRate: true,
@@ -19,7 +19,13 @@ export const AdminSettings: React.FC = () => {
     const settings = getKioskSettings();
     setHospitalName(settings.hospitalName);
     setKioskId(settings.kioskId);
-    setVitalsConfig(settings.vitals);
+    setVitalsConfig({
+      respiratoryRate: settings.vitals.respiratoryRate ?? true,
+      pulse: settings.vitals.pulse ?? true,
+      spo2: settings.vitals.spo2 ?? true,
+      bp: settings.vitals.bp ?? true,
+      temperature: settings.vitals.temperature ?? true
+    });
   }, []);
 
   const handleSave = () => {

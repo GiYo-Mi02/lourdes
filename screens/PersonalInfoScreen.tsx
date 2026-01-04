@@ -1,32 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { PatientData } from '../types';
+import { PatientData, AccessibilityState } from '../types';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface Props {
   data: PatientData;
   onUpdate: (data: Partial<PatientData>) => void;
   onNext: () => void;
   onBack: () => void;
+  accessibility: AccessibilityState;
 }
 
-export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, onBack }) => {
+export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, onBack, accessibility }) => {
+  const { t } = useTranslation(accessibility);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!data.firstName) newErrors.firstName = "First name is required";
-    if (!data.lastName) newErrors.lastName = "Last name is required";
+    if (!data.firstName) newErrors.firstName = t('required_field');
+    if (!data.lastName) newErrors.lastName = t('required_field');
     
     // Simple date validation (assumes MM/DD/YYYY format in a single string for simplicity here, 
     // though prompt asked for split fields. Implementing split fields logic below)
     const [mm, dd, yyyy] = data.dob.split('/');
     if (!mm || !dd || !yyyy || mm.length !== 2 || dd.length !== 2 || yyyy.length !== 4) {
-        if (data.dob.length > 0) newErrors.dob = "Invalid date format";
+        if (data.dob.length > 0) newErrors.dob = t('required_field');
     }
 
-    if (!data.gender) newErrors.gender = "Please select a gender";
+    if (!data.gender) newErrors.gender = t('required_field');
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -58,17 +61,23 @@ export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, on
     onUpdate({ dob: newDob });
   };
 
+  // Generate arrays for dropdowns
+  const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 120 }, (_, i) => String(currentYear - i));
+
   const [mm, dd, yyyy] = data.dob.split('/');
 
   return (
     <div className="animate-slide-in-right">
       <div className="bg-white rounded-xl shadow-lg p-8 max-w-3xl mx-auto border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Personal Information</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('personal_info_title')}</h2>
         
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="First Name"
+              label={t('first_name')}
               required
               value={data.firstName}
               onChange={(e) => onUpdate({ firstName: e.target.value })}
@@ -78,7 +87,7 @@ export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, on
               placeholder="e.g. John"
             />
             <Input
-              label="Last Name"
+              label={t('last_name')}
               required
               value={data.lastName}
               onChange={(e) => onUpdate({ lastName: e.target.value })}
@@ -90,38 +99,54 @@ export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, on
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span className="text-error">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('date_of_birth')} <span className="text-error">*</span></label>
             <div className="flex gap-4 items-start">
-                <div className="w-24">
-                    <input 
-                        className={`w-full h-12 px-3 border rounded-lg text-center focus:ring-2 focus:ring-medical-blue focus:outline-none ${errors.dob ? 'border-error' : 'border-gray-300'}`}
-                        placeholder="MM"
-                        maxLength={2}
+                <div className="flex-1 relative">
+                    <select 
+                        className={`w-full h-12 px-3 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-medical-blue focus:outline-none ${errors.dob ? 'border-error' : 'border-gray-300'}`}
                         value={mm || ''}
-                        onChange={(e) => handleDateChange('mm', e.target.value.replace(/\D/g, ''))}
-                    />
+                        onChange={(e) => handleDateChange('mm', e.target.value)}
+                    >
+                        <option value="">Month</option>
+                        {months.map(month => (
+                            <option key={month} value={month}>{month}</option>
+                        ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                        <i className="fas fa-chevron-down text-xs"></i>
+                    </div>
                     <span className="text-xs text-gray-400 mt-1 block text-center">Month</span>
                 </div>
-                <span className="text-2xl text-gray-300 mt-1">/</span>
-                <div className="w-24">
-                    <input 
-                        className={`w-full h-12 px-3 border rounded-lg text-center focus:ring-2 focus:ring-medical-blue focus:outline-none ${errors.dob ? 'border-error' : 'border-gray-300'}`}
-                        placeholder="DD"
-                        maxLength={2}
+                <div className="flex-1 relative">
+                    <select 
+                        className={`w-full h-12 px-3 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-medical-blue focus:outline-none ${errors.dob ? 'border-error' : 'border-gray-300'}`}
                         value={dd || ''}
-                        onChange={(e) => handleDateChange('dd', e.target.value.replace(/\D/g, ''))}
-                    />
+                        onChange={(e) => handleDateChange('dd', e.target.value)}
+                    >
+                        <option value="">Day</option>
+                        {days.map(day => (
+                            <option key={day} value={day}>{day}</option>
+                        ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                        <i className="fas fa-chevron-down text-xs"></i>
+                    </div>
                     <span className="text-xs text-gray-400 mt-1 block text-center">Day</span>
                 </div>
-                <span className="text-2xl text-gray-300 mt-1">/</span>
-                <div className="flex-1">
-                    <input 
-                        className={`w-full h-12 px-3 border rounded-lg text-center focus:ring-2 focus:ring-medical-blue focus:outline-none ${errors.dob ? 'border-error' : 'border-gray-300'}`}
-                        placeholder="YYYY"
-                        maxLength={4}
+                <div className="flex-1 relative">
+                    <select 
+                        className={`w-full h-12 px-3 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-medical-blue focus:outline-none ${errors.dob ? 'border-error' : 'border-gray-300'}`}
                         value={yyyy || ''}
-                        onChange={(e) => handleDateChange('yyyy', e.target.value.replace(/\D/g, ''))}
-                    />
+                        onChange={(e) => handleDateChange('yyyy', e.target.value)}
+                    >
+                        <option value="">Year</option>
+                        {years.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                        <i className="fas fa-chevron-down text-xs"></i>
+                    </div>
                     <span className="text-xs text-gray-400 mt-1 block text-center">Year</span>
                 </div>
             </div>
@@ -130,18 +155,18 @@ export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, on
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gender <span className="text-error">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('gender')} <span className="text-error">*</span></label>
                 <select 
                     className={`w-full h-12 px-4 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-medical-blue focus:outline-none ${touched.gender && errors.gender ? 'border-error' : 'border-gray-300'}`}
                     value={data.gender}
                     onChange={(e) => onUpdate({ gender: e.target.value as any })}
                     onBlur={() => setTouched(prev => ({ ...prev, gender: true }))}
                 >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
+                    <option value="">{t('select_gender')}</option>
+                    <option value="Male">{t('male')}</option>
+                    <option value="Female">{t('female')}</option>
+                    <option value="Other">{t('other')}</option>
+                    <option value="Prefer not to say">{t('prefer_not_say')}</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 pt-6 text-gray-700">
                     <i className="fas fa-chevron-down text-xs"></i>
@@ -150,17 +175,17 @@ export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, on
             </div>
             
             <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Civil Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('civil_status')}</label>
                 <select 
                     className="w-full h-12 px-4 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-medical-blue focus:outline-none"
                     value={data.civilStatus}
                     onChange={(e) => onUpdate({ civilStatus: e.target.value as any })}
                 >
-                    <option value="">Select Status</option>
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Divorced">Divorced</option>
-                    <option value="Widowed">Widowed</option>
+                    <option value="">{t('civil_status')}</option>
+                    <option value="Single">{t('single')}</option>
+                    <option value="Married">{t('married')}</option>
+                    <option value="Divorced">{t('separated')}</option>
+                    <option value="Widowed">{t('widowed')}</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 pt-6 text-gray-700">
                     <i className="fas fa-chevron-down text-xs"></i>
@@ -171,10 +196,10 @@ export const PersonalInfoScreen: React.FC<Props> = ({ data, onUpdate, onNext, on
 
         <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between">
             <Button variant="outline" onClick={onBack} leftIcon={<i className="fas fa-arrow-left"></i>}>
-                Back
+                {t('back_button')}
             </Button>
             <Button onClick={handleNext} rightIcon={<i className="fas fa-arrow-right"></i>}>
-                Next
+                {t('next_button')}
             </Button>
         </div>
       </div>

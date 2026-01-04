@@ -56,18 +56,6 @@ export const AccessibilityToolbar: React.FC<Props> = ({ settings, onUpdate }) =>
         </button>
       </div>
 
-      {/* High Contrast */}
-      <button
-        onClick={toggleContrast}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          settings.highContrast ? 'bg-yellow-400 text-black border-2 border-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        }`}
-        aria-label="Toggle High Contrast"
-        title="High Contrast Mode"
-      >
-        <i className="fas fa-palette text-lg"></i>
-      </button>
-
       {/* Audio Toggle (Descriptions) */}
       <button
         onClick={toggleAudio}
@@ -100,9 +88,7 @@ export const AccessibilityToolbar: React.FC<Props> = ({ settings, onUpdate }) =>
           onChange={(e) => onUpdate({...settings, language: e.target.value})}
         >
           <option value="EN">🇺🇸 EN</option>
-          <option value="ES">🇪🇸 ES</option>
           <option value="TL">🇵🇭 TL</option>
-          <option value="ZH">🇨🇳 ZH</option>
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
           <i className="fas fa-chevron-down text-xs"></i>

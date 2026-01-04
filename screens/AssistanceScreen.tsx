@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
-import { createAssistanceRequest, getKioskSettings } from '../services/patientService';
+import { createAssistanceRequest, getKioskSettings, getAssistanceRequests } from '../services/patientService';
+import { useTranslation } from '../hooks/useTranslation';
+import { AccessibilityState } from '../types';
 
 interface Props {
   onBack: () => void;
+  accessibility: AccessibilityState;
 }
 
-export const AssistanceScreen: React.FC<Props> = ({ onBack }) => {
+export const AssistanceScreen: React.FC<Props> = ({ onBack, accessibility }) => {
+  const { t } = useTranslation(accessibility);
   const [seconds, setSeconds] = useState(0);
   const [requestSent, setRequestSent] = useState(false);
   const [kioskId, setKioskId] = useState('KIOSK-01');
+  const [requestId, setRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     // Get kiosk settings
@@ -19,7 +24,8 @@ export const AssistanceScreen: React.FC<Props> = ({ onBack }) => {
     // Create assistance request on mount
     const sendRequest = async () => {
       try {
-        await createAssistanceRequest();
+        const request = await createAssistanceRequest();
+        setRequestId(request.id);
         setRequestSent(true);
       } catch (err) {
         console.error("Failed to send assistance request:", err);
@@ -27,6 +33,29 @@ export const AssistanceScreen: React.FC<Props> = ({ onBack }) => {
     };
     sendRequest();
   }, []);
+
+  // Poll to check if admin has resolved the request
+  useEffect(() => {
+    if (!requestId) return;
+
+    const checkResolved = async () => {
+      try {
+        const requests = await getAssistanceRequests();
+        const myRequest = requests.find(r => r.id === requestId);
+        
+        if (myRequest && myRequest.status === 'resolved') {
+          console.log('✅ Assistance request resolved by admin - returning to previous page');
+          onBack(); // Automatically return to previous page
+        }
+      } catch (err) {
+        console.error('Failed to check assistance status:', err);
+      }
+    };
+
+    // Check every 2 seconds
+    const interval = setInterval(checkResolved, 2000);
+    return () => clearInterval(interval);
+  }, [requestId, onBack]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -50,9 +79,9 @@ export const AssistanceScreen: React.FC<Props> = ({ onBack }) => {
         </div>
       </div>
       
-      <h2 className="text-3xl font-bold text-gray-800 mb-2">Assistance Requested</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('assistance_title')}</h2>
       <p className="text-medical-blue font-medium mb-8 bg-blue-50 px-4 py-1 rounded-full text-sm">
-         Staff notified {formatTime(seconds)}
+         {t('assistance_subtitle')} {formatTime(seconds)}
       </p>
       
       <div className="bg-white border border-blue-100 rounded-xl p-8 max-w-lg w-full mb-8 shadow-lg">
@@ -61,15 +90,15 @@ export const AssistanceScreen: React.FC<Props> = ({ onBack }) => {
             <span className="font-semibold">{requestSent ? 'Signal Sent Successfully' : 'Sending signal...'}</span>
         </div>
         <p className="text-xl text-gray-800 mb-4 font-semibold">
-          A nurse is on their way.
+          {t('assistance_wait_message')}
         </p>
         <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-          Please remain at the kiosk. Help will arrive shortly to assist you with the check-in process.
+          {t('assistance_description')}
         </p>
         
         <div className="flex items-center justify-center gap-3 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg border border-gray-200 mx-auto max-w-xs">
             <i className="fas fa-map-marker-alt text-red-500 text-lg"></i>
-            <span className="font-mono font-medium">Location: {kioskId}</span>
+            <span className="font-mono font-medium">{t('assistance_location')}: {kioskId}</span>
         </div>
       </div>
 
@@ -84,7 +113,7 @@ export const AssistanceScreen: React.FC<Props> = ({ onBack }) => {
         leftIcon={<i className="fas fa-undo"></i>} 
         className="bg-white hover:bg-gray-50 border-gray-300 text-gray-600 hover:text-gray-800 min-w-[250px]"
       >
-        Cancel Request & Return
+        {t('assistance_cancel')}
       </Button>
     </div>
   );

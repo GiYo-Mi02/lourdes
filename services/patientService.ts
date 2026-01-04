@@ -16,7 +16,7 @@ export interface KioskSettings {
 }
 
 const DEFAULT_KIOSK_SETTINGS: KioskSettings = {
-  hospitalName: 'Lourdes Hospital',
+  hospitalName: 'Vitalis Kiosk',
   kioskId: 'KIOSK-01',
   vitals: {
     respiratoryRate: true,

@@ -70,7 +70,7 @@ export const SuccessScreen: React.FC<Props> = ({ onRestart, data }) => {
             </ul>
           </div>
           <div class="footer">
-            <p>Thank you for choosing Lourdes Hospital</p>
+            <p>Thank you for choosing Vitalis Kiosk</p>
             <p>For emergencies, please notify staff immediately</p>
           </div>
         </body>

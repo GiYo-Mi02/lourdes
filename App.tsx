@@ -187,10 +187,10 @@ const App: React.FC = () => {
   const successIndex = reviewIndex + 1;
 
   const renderScreen = () => {
-    if (step === 0) return <WelcomeScreen onNext={nextStep} onAdminLogin={toggleAdmin} />;
-    if (step === 1) return <PersonalInfoScreen data={patientData} onUpdate={updateData} onNext={nextStep} onBack={prevStep} />;
-    if (step === 2) return <ContactInfoScreen data={patientData} onUpdate={updateData} onNext={nextStep} onBack={prevStep} />;
-    if (step === 3) return <VitalsBriefingScreen onNext={nextStep} onBack={prevStep} />;
+    if (step === 0) return <WelcomeScreen onNext={nextStep} onAdminLogin={toggleAdmin} accessibility={accessibility} />;
+    if (step === 1) return <PersonalInfoScreen data={patientData} onUpdate={updateData} onNext={nextStep} onBack={prevStep} accessibility={accessibility} />;
+    if (step === 2) return <ContactInfoScreen data={patientData} onUpdate={updateData} onNext={nextStep} onBack={prevStep} accessibility={accessibility} />;
+    if (step === 3) return <VitalsBriefingScreen onNext={nextStep} onBack={prevStep} accessibility={accessibility} />;
     
     // Dynamic Vitals
     if (step >= vitalsStartIndex && step < reviewIndex) {
@@ -207,13 +207,14 @@ const App: React.FC = () => {
                 onBack={prevStep}
                 onSkip={nextStep}
                 onRequestHelp={goToAssistance}
+                accessibility={accessibility}
             />
         );
     }
 
     if (step === reviewIndex) return <ReviewScreen data={patientData} onSubmit={nextStep} onBack={prevStep} onEdit={goToStep} />;
     if (step === successIndex) return <SuccessScreen onRestart={resetApp} data={patientData} />;
-    if (step === 99) return <AssistanceScreen onBack={returnFromAssistance} />;
+    if (step === 99) return <AssistanceScreen onBack={returnFromAssistance} accessibility={accessibility} />;
     
     return null;
   };
@@ -255,7 +256,7 @@ const App: React.FC = () => {
                     </div>
                     <div>
                         <h1 className="font-bold text-gray-800 text-lg leading-tight">Lourdes Hospital</h1>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">Patient Kiosk</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">Vitalis Kiosk</p>
                     </div>
                 </div>
             )}
